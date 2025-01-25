@@ -1,7 +1,6 @@
 // import Image from "next/image";
 import Link from 'next/link';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import styles from '@/app/ui/home.module.css';
 import TMLlogo from '@/app/ui/TML-logo';
 
 export default function Home() {
@@ -13,13 +12,11 @@ export default function Home() {
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
-        <div className={styles.shape}/>
           <p className={`text-xl text-gray-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome the Mommy Lounge.</strong> This is the example for the{' '}
-            <a href="https://nextjs.org/learn/" className="text-blue-500">
-              Next.js Learn Course
-            </a>
-            , brought to you by Vercel.
+            <strong>Welcome the Mommy Lounge! </strong> 
+            The Mommy Lounge is a website where moms can share tips, 
+            ideas, stories, and activities while building a sense of 
+            community with other moms. 
           </p>
           <Link
             href="/login"
