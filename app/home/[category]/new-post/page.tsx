@@ -22,7 +22,7 @@ export default function NewPostPage({ params }: { params: Promise<{ category: st
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title, content, category }),
+      body: JSON.stringify({ title, category, content }),
     });
 
     if (response.ok) {
@@ -39,6 +39,7 @@ export default function NewPostPage({ params }: { params: Promise<{ category: st
       <form onSubmit={handleSubmit} className="flex flex-col">
         <input
           type="text"
+          name="newPost"
           placeholder="Post title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}

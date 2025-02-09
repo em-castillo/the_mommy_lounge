@@ -5,6 +5,9 @@ import { useState, useEffect } from "react";
 import { use } from "react"; //unwrap params
 import Search from "@/app/ui/home/search";
 import { lusitana } from "@/app/ui/fonts";
+import Link from "next/link";
+import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+
 
 interface Post {
   _id: string;
@@ -63,6 +66,26 @@ export default function Page({ params }: { params: Promise<{ category: string }>
     const handleNewPost = () => {
       router.push(`/home/${decodedCategory}/new-post`);
     };
+
+    // Deletes post by ID
+    async function handleDelete(postId: string) {
+      if (!confirm("Are you sure you want to delete this post?")) return;
+  
+      try {
+        const res = await fetch("/api/posts", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: postId }),
+        });
+  
+        if (!res.ok) throw new Error("Failed to delete post");
+  
+        // Remove deleted post from state
+        setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      } catch (error) {
+        console.error("Error deleting post:", error);
+      }
+    }
    
     return (
       <div className="w-full">
@@ -95,10 +118,32 @@ export default function Page({ params }: { params: Promise<{ category: string }>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {posts.map((post: any) => ( 
               <li key={post._id} className="mb-4 w-full">
-                <div className="border p-4 rounded-lg shadow-md">
+                <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
+                <div className="flex flex-col w-full">
                   <h3 className="font-semibold text-lg">{post.title}</h3>
                   <p>{post.content}</p>
-                </div>
+                  </div>
+
+                  <div className="ml-4 flex justify-between gap-2">
+                    {/* Comment Button */}
+                  <Link href={`/home/${category}/comments/${post._id}`}>
+                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
+                    <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+                    </button>
+                  </Link> 
+                  {/* Edit Button */}
+                  <Link href={`/home/${category}/edit/${post._id}`}>
+                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
+                    <PencilIcon className="w-5 h-5" />
+                    </button>
+                  </Link>
+                  {/* Delete Button */}
+                    <button onClick={() => handleDelete(post._id)} 
+                     className=" border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                  </div>
               </li>
             ))}
           </ul>
