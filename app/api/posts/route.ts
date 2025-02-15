@@ -2,16 +2,11 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// interface Params {
-//   params: { id: string };
-// }
-
 // GET posts based by category or post ID
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    // const {id} = params;
-    const id = url.searchParams.get("id"); // get post by ID
+    // const id = url.searchParams.get("id"); // get post by ID
     let category = url.searchParams.get("category"); // Get category from query params
 
     if (category) {
@@ -22,15 +17,12 @@ export async function GET(req: Request) {
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-    // if (!id) {
-    //   return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
-    // }
 
-    if (id) {
-      // Fetch a single post by ID
-      const post = await postsCollection.findOne({ _id: new ObjectId(id) });
-      return NextResponse.json(post, { status: 200 });
-    }
+    // if (id) {
+    //   // Fetch a single post by ID
+    //   const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+    //   return NextResponse.json(post, { status: 200 });
+    // }
 
     let posts;
     if (category) {
@@ -86,19 +78,18 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
     
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
+    }
+
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-    if (!ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid post ID" }, { status: 400 });
-    }
-
-    const objectId = new ObjectId(id); // Convert to MongoDB ObjectId
-
+    // Update the post
     const result = await postsCollection.updateOne(
-      { _id: objectId },
-      { $set: { title, content } }
+      { _id: new ObjectId(id) }, // Find the post by ID
+      { $set: { title, content } } // Update the title and content
     );
 
     if (result.matchedCount === 0) {
@@ -119,11 +110,16 @@ export async function PATCH(req: Request) {
 //DELETE
 export async function DELETE(req: Request) {
   try {
+  
     const body = await req.json();
     const { id } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Missing post ID" }, { status: 400 });
+    }
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
 
     const client = await clientPromise;

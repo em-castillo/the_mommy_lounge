@@ -1,3 +1,5 @@
+// Shows posts by category
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -8,11 +10,11 @@ import { lusitana } from "@/app/ui/fonts";
 import Link from "next/link";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-
 interface Post {
   _id: string;
   title: string;
   content: string;
+  comments: { id: string }[];
 }
 
 export default function Page({ params }: { params: Promise<{ category: string }> }) {
@@ -32,7 +34,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // category is decoded to handle special characters (&, spaces, etc.)
+    // category is decoded to handle special characters 
     const decodedCategory = decodeURIComponent(category);
 
    
@@ -126,9 +128,10 @@ export default function Page({ params }: { params: Promise<{ category: string }>
 
                   <div className="ml-4 flex justify-between gap-2">
                     {/* Comment Button */}
-                  <Link href={`/home/${category}/comments/${post._id}`}>
-                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
-                    <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+                  <Link href={`/home/${category}/post/${post._id}`}>
+                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition flex items-center gap-1">
+                      <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+                      <span>{post.comments?.length || 0}</span> {/* Show number of comments */}
                     </button>
                   </Link> 
                   {/* Edit Button */}

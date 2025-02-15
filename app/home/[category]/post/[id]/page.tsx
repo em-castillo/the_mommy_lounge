@@ -1,0 +1,193 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+}
+
+interface Comment {
+    // id: string;
+  _id: string;
+  text: string;
+  author: string;
+  timestamp: string;
+}
+
+export default function PostPage() {
+  const params = useParams();
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  const { category, id } = params as { category: string; id: string };
+  const router = useRouter();
+
+  const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editedText, setEditedText] = useState("");
+
+
+  // Fetch post and comments
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setError(null); 
+
+        // Fetch post
+        const postRes = await fetch(`/api/posts?id=${id}`);
+        if (!postRes.ok) throw new Error("Failed to fetch post");
+        const postData = await postRes.json();
+        setPost(postData);
+
+        // Fetch comments
+        const commentsRes = await fetch(`/api/posts/${id}/comments`);
+        if (!commentsRes.ok) {
+          // If no comments exist, don't treat it as an error
+          if (commentsRes.status === 404) {
+            setComments([]); // No comments yet
+          } else {
+            throw new Error("Failed to fetch comments");
+          }
+        } else {
+          const commentsData = await commentsRes.json();
+          setComments(commentsData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("An error occurred while fetching data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [id]);
+
+
+  useEffect(() => {
+    async function fetchComments() {
+      const res = await fetch(`/api/posts/${id}/comments`);
+      const data = await res.json();
+      setComments(data.comments);  // Set the fetched comments into state
+    }
+  
+    fetchComments();
+  }, [id]); // Run the effect when postId changes
+  
+
+// Add comment
+  async function handleAddComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    const author = "Anonymous";
+
+    try {
+        console.log("Sending Comment:", { text: newComment, author });
+
+    const res = await fetch(`/api/posts/${id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: newComment, author }),
+      });
+
+    if (!res.ok) throw new Error("Failed to add comment");
+   
+    setNewComment(""); // Clear input
+
+    const updatedCommentsRes = await fetch(`/api/posts/${id}/comments`);
+    if (!updatedCommentsRes.ok) throw new Error("Failed to fetch updated comments");
+    
+    const updatedComments = await updatedCommentsRes.json();
+    setComments(updatedComments); 
+      
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  }
+
+  // Edit comment
+  
+  
+  
+  
+  
+  // Delete comment
+  
+  
+  
+
+  return (
+    <div className="max-w-2xl mx-auto mt-10">
+      {loading ? (
+        <p>Loading comments...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : post ? (
+        <>
+          <h1 className="text-2xl font-bold">{post.title}</h1>
+          <p className="mt-2">{post.content}</p>
+
+          {/* Comment Section */}
+          <div className="mt-6 border-t pt-4">
+            <h2 className="text-xl font-semibold flex items-center gap-1">
+              <ChatBubbleOvalLeftIcon className="w-6 h-6" /> Comments
+            </h2>
+
+            <ul className="mt-4 space-y-2">
+            {comments.length > 0 ? (
+                comments.map((comment) => (
+                    <li key={comment._id} className="border p-2 rounded">
+                                <p>{comment.text}</p>
+                                <div className="flex gap-2">
+                                <button
+                                    
+                                    className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition"
+                                >
+                                    <PencilIcon className="w-5 h-5" />
+                                </button>
+                                <button
+                                                            className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition"
+                                >
+                                    <TrashIcon className="w-5 h-5" />
+                                </button>
+                                </div>
+                            </li>
+                ))
+            ) : (
+                <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+            )}
+            </ul>
+
+
+
+            {/* Add Comment Form */}
+            <form onSubmit={handleAddComment} className="mt-4 flex gap-2">
+              <input
+                type="text"
+                name="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write a comment..."
+                className="border p-2 flex-1 rounded"
+              />
+              <button
+                type="submit"
+                className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition"
+              >
+                Comment
+              </button>
+            </form>
+        
+          </div>
+        </>
+      ) : (
+        <p>Post not found</p>
+      )}
+    </div>
+  );
+}
