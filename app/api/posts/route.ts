@@ -6,7 +6,6 @@ import { ObjectId } from "mongodb";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    // const id = url.searchParams.get("id"); // get post by ID
     let category = url.searchParams.get("category"); // Get category from query params
     const query = url.searchParams.get("query") || "";
 
@@ -18,12 +17,6 @@ export async function GET(req: Request) {
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-
-    // if (id) {
-    //   // Fetch a single post by ID
-    //   const post = await postsCollection.findOne({ _id: new ObjectId(id) });
-    //   return NextResponse.json(post, { status: 200 });
-    // }
 
     const filter: Record<string, unknown> = {};
     
