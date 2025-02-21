@@ -3,7 +3,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 // GET 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(context: { params: { id: string } }) {
   try {
     const { id } = await context.params;
     if (!ObjectId.isValid(id)) {
