@@ -8,6 +8,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     // const id = url.searchParams.get("id"); // get post by ID
     let category = url.searchParams.get("category"); // Get category from query params
+    const query = url.searchParams.get("query") || "";
 
     if (category) {
       category = decodeURIComponent(category); // Decode category 
@@ -24,12 +25,21 @@ export async function GET(req: Request) {
     //   return NextResponse.json(post, { status: 200 });
     // }
 
-    let posts;
+    const filter: Record<string, unknown> = {};
+    
     if (category) {
-      posts = await postsCollection.find({ category }).toArray(); // Filter by category
-    } else {
-      posts = await postsCollection.find().toArray(); // Fetch all posts if no category provided
+      filter.category = category;
     }
+
+    if (query) {
+      filter.$or = [
+        { title: { $regex: query, $options: "i" } }, // Case-insensitive 
+        { content: { $regex: query, $options: "i" } }, 
+        { "comments.text": { $regex: query, $options: "i" } },
+      ];
+    }
+
+    const posts = await postsCollection.find(filter).toArray();
 
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {

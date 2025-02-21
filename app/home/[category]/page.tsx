@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { use } from "react"; //unwrap params
 import Search from "@/app/ui/home/search";
@@ -18,18 +18,11 @@ interface Post {
 }
 
 export default function Page({ params }: { params: Promise<{ category: string }> }) {
-// export default async function Page(props: {
-//     searchParams?: Promise<{
-//       query?: string;
-//       page?: string;
-//     }>;
-//   }) {
-    // const searchParams = await props.searchParams;
-    // const query = searchParams?.query || '';
-    // const currentPage = Number(searchParams?.page) || 1;
 
     const { category } = use(params); // Extract category from URL params
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const query = searchParams.get("query") || ""; // Get search query from URL
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,7 +35,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
       async function fetchPosts() {
         try {
           const res = await fetch(
-            `${process.env.NEXT_PUBLIC_SITE_URL}/api/posts?category=${encodeURIComponent(decodedCategory)}`,
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/posts?category=${encodeURIComponent(decodedCategory)}&query=${encodeURIComponent(query)}`,
             { cache: "no-store" }
           );
   
@@ -63,7 +56,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
       if (decodedCategory) {
         fetchPosts();
       }
-    }, [decodedCategory]);
+    }, [decodedCategory, query]);
   
     const handleNewPost = () => {
       router.push(`/home/${decodedCategory}/new-post`);
