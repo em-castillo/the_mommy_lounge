@@ -204,6 +204,7 @@ export default function PostPage() {
                   <div className="flex gap-2">
                     <input
                       type="text"
+                      name="text"
                       value={editedText}
                       onChange={(e) => setEditedText(e.target.value)}
                       className="border p-1 rounded w-full"

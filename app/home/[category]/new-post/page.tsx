@@ -39,7 +39,7 @@ export default function NewPostPage({ params }: { params: Promise<{ category: st
       <form onSubmit={handleSubmit} className="flex flex-col">
         <input
           type="text"
-          name="newPost"
+          name="title"
           placeholder="Post title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -48,6 +48,7 @@ export default function NewPostPage({ params }: { params: Promise<{ category: st
         />
         <textarea
           placeholder="Post content"
+          name="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           required
