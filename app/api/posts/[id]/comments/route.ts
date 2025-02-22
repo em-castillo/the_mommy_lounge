@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 // GET 
 export async function GET(req: NextRequest, {params}: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } =  params;
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
