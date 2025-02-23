@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { SignedIn } from '@clerk/nextjs';
 
 interface Post {
   _id: string;
@@ -173,8 +174,7 @@ export default function PostPage() {
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
-  }
-  
+  }  
   
   
   console.log("Comments array:", comments);
@@ -199,6 +199,7 @@ export default function PostPage() {
             {comments.length > 0 ? (
                 comments.map((comment) => (
                   <li key={comment.id} className="border p-2 rounded">
+                    
                     {/* Display the comment text or editable input if it's being edited */}
                   {editingCommentId === comment.id ? (
                   <div className="flex gap-2">
@@ -226,6 +227,7 @@ export default function PostPage() {
                 ) : (
                   <div className="flex justify-between">
                     <p>{comment.text}</p>
+                    <SignedIn>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditButtonClick(comment.id, comment.text)} // Set the current text to edit
@@ -241,6 +243,7 @@ export default function PostPage() {
                         <TrashIcon className="w-5 h-5" />
                       </button>
                     </div>
+                    </SignedIn>
                   </div>
                  )}
                 </li>
@@ -253,6 +256,7 @@ export default function PostPage() {
 
 
             {/* Add Comment Form */}
+            <SignedIn>
             <form onSubmit={handleAddComment} className="mt-4 flex gap-2">
               <input
                 type="text"
@@ -269,6 +273,7 @@ export default function PostPage() {
                 Comment
               </button>
             </form>
+            </SignedIn>
         
           </div>
         </>

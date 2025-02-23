@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
+import {ClerkProvider} from '@clerk/nextjs'
 
 
 // metadata
@@ -14,12 +15,9 @@ export const metadata: Metadata = {
 };
 
 // layout
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({children}: Readonly<{children: React.ReactNode;}>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body
         className={`${inter.className} antialiased`}
@@ -27,5 +25,6 @@ export default function RootLayout({
         {children}
       </body>
     </html>
+    </ClerkProvider>
   );
 }

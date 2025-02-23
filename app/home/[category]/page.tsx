@@ -9,6 +9,7 @@ import Search from "@/app/ui/home/search";
 import { lusitana } from "@/app/ui/fonts";
 import Link from "next/link";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { SignedIn } from '@clerk/nextjs';
 
 interface Post {
   _id: string;
@@ -81,8 +82,21 @@ export default function Page({ params }: { params: Promise<{ category: string }>
         console.error("Error deleting post:", error);
       }
     }
+
+    function highlightText(text: string, searchTerm: string) {
+      if (!searchTerm) return text;
+      const regex = new RegExp(`(${searchTerm})`, "gi");
+      return text.split(regex).map((part, i) =>
+        part.toLowerCase() === searchTerm.toLowerCase() ? (
+          <mark key={i} className="bg-red-200">{part}</mark>
+        ) : (
+          part
+        )
+      );
+    }
    
     return (
+      
       <div className="w-full">
         <div className="flex w-full items-center justify-between">
           <h1 className={`${lusitana.className} text-2xl`}>{decodedCategory} forum</h1>
@@ -90,12 +104,14 @@ export default function Page({ params }: { params: Promise<{ category: string }>
 
         <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
           <Search placeholder="Search topics..." />
+          <SignedIn>
           <button 
             onClick={handleNewPost} 
             className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition"
         >
           New Post
         </button>
+        </SignedIn>
         </div>
         {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
@@ -115,8 +131,8 @@ export default function Page({ params }: { params: Promise<{ category: string }>
               <li key={post._id} className="mb-4 w-full">
                 <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
                 <div className="flex flex-col w-full">
-                  <h3 className="font-semibold text-lg">{post.title}</h3>
-                  <p>{post.content}</p>
+                  <h3 className="font-semibold text-lg">{highlightText(post.title, query)}</h3>
+                  <p>{highlightText(post.content, query)}</p>
                   </div>
 
                   <div className="ml-4 flex justify-between gap-2">
@@ -128,6 +144,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
                     </button>
                   </Link> 
                   {/* Edit Button */}
+                  <SignedIn>
                   <Link href={`/home/${category}/edit/${post._id}`}>
                     <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
                     <PencilIcon className="w-5 h-5" />
@@ -138,6 +155,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
                      className=" border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
                       <TrashIcon className="w-5 h-5" />
                     </button>
+                    </SignedIn>
                   </div>
                   </div>
               </li>

@@ -3,9 +3,10 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 // GET 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
+    const id = params.id; // No need to await
+
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
 
     const post = await postsCollection.findOne(
       { _id: new ObjectId(id) },
-      { projection: { comments: 1 } } // Fetch only comments);
+      { projection: { comments: 1 } } // Fetch only comments
     );
 
     if (!post) {
@@ -29,6 +30,7 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }
+
 
 // POST 
 export async function POST(req: Request, context: { params: { id: string } }) {
