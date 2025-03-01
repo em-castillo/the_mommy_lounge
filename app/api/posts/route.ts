@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-// import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 // GET posts based by category or post ID
 export async function GET(req: Request) {
@@ -50,14 +50,14 @@ export async function GET(req: Request) {
 //POST
 export async function POST(req: NextRequest) {
   try {
-    //user auth
-    // const { userId } = getAuth(req); // Get user authentication info
+    const authData = await auth(); // Await the auth function
+    const userId = authData?.userId; // Get the userId from auth
+  
+    if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    // if (!userId) {
-    //   return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
-    // }
-
-    const body = await req.json(); // Parse incoming request body
+    const body = await req.json(); 
     const { title, category, content } = body;
 
     if (!title || !category || !content) {
@@ -70,7 +70,12 @@ export async function POST(req: NextRequest) {
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-    const result = await postsCollection.insertOne({ title, category: decodedCategory, content, createdAt: new Date() });
+    const result = await postsCollection.insertOne({ 
+      title, 
+      category: decodedCategory, 
+      content, 
+      userId, //store user id
+      createdAt: new Date() });
 
     return NextResponse.json({ message: "Post created", id: result.insertedId }, { status: 201 });
   } catch (error) {
@@ -82,12 +87,12 @@ export async function POST(req: NextRequest) {
 // UPDATE
 export async function PATCH(req: NextRequest) {
   try {
-    //user auth
-    // const { userId } = getAuth(req); // Get user authentication info
+    const authData = await auth(); 
+    const userId = authData?.userId; 
 
-    // if (!userId) {
-    //   return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
-    // } 
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } 
 
     const body = await req.json();
     const { id, title, content } = body; // Extract post ID and updated fields
@@ -104,17 +109,15 @@ export async function PATCH(req: NextRequest) {
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-    // Find the post by ID
-    // const post = await postsCollection.findOne({ _id: new ObjectId(id) });
-
-    // if (!post) {
-    //   return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    // }
-
-    // // Check if the authenticated user is the owner of the post
-    // if (post.userId !== userId) {
-    //   return NextResponse.json({ error: "You are not authorized to edit this post" }, { status: 403 });
-    // }
+  // Ensure the post belongs to the user
+  const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+  
+  if (!post) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+  if (post.userId !== userId) {
+    return NextResponse.json({ error: "Unauthorized to edit this post" }, { status: 403 });
+  }
 
     // Update the post
     const result = await postsCollection.updateOne(
@@ -140,12 +143,12 @@ export async function PATCH(req: NextRequest) {
 //DELETE
 export async function DELETE(req: NextRequest) {
   try {
-    //user auth
-    // const { userId } = getAuth(req); // Get user authentication info
+    const authData = await auth(); 
+    const userId = authData?.userId; 
 
-    // if (!userId) {
-    //   return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
-    // } 
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   
     const body = await req.json();
     const { id } = body;
@@ -162,17 +165,14 @@ export async function DELETE(req: NextRequest) {
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
-    // Find the post by ID
-    // const post = await postsCollection.findOne({ _id: new ObjectId(id) });
-
-    // if (!post) {
-    //   return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    // }
-
-    // // Check if the authenticated user is the owner of the post
-    // if (post.userId !== userId) {
-    //   return NextResponse.json({ error: "You are not authorized to edit this post" }, { status: 403 });
-    // }
+    const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+    
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+    if (post.userId !== userId) {
+      return NextResponse.json({ error: "Unauthorized to delete this post" }, { status: 403 });
+    }
 
     const result = await postsCollection.deleteOne({ _id: new ObjectId(id) });
 

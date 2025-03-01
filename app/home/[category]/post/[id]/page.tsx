@@ -3,27 +3,32 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { SignedIn } from '@clerk/nextjs';
+import { useUser, SignedIn } from '@clerk/nextjs';
 
 interface Post {
   _id: string;
+  userId: string;
+  username: string;
   title: string;
   content: string;
 }
 
 interface Comment {
   id: string;
+  userId: string;
+  username: string;
   text: string;
   author: string;
   timestamp: string;
 }
 
 export default function PostPage() {
+  const { user } = useUser(); 
+  const userId = user?.id; 
   const params = useParams();
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const { category, id } = params as { category: string; id: string };
   const router = useRouter();
-
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -227,6 +232,10 @@ export default function PostPage() {
                 ) : (
                   <div className="flex justify-between">
                     <p>{comment.text}</p>
+
+                    {/* Show Edit/Delete only if the user is the post owner */}
+                 {userId === comment.userId && (
+                      <>
                     <SignedIn>
                     <div className="flex gap-2">
                       <button
@@ -244,6 +253,8 @@ export default function PostPage() {
                       </button>
                     </div>
                     </SignedIn>
+                    </>
+                    )}
                   </div>
                  )}
                 </li>

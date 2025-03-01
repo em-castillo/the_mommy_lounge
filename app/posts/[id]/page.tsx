@@ -3,9 +3,12 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Link from "next/link";
 
 interface Comment {
   id: string;
+  userId: string;
+  username: string;
   text: string;
   author: string;
   timestamp: string;
@@ -13,6 +16,8 @@ interface Comment {
 
 interface Post {
   _id: string;
+  userId: string;
+  username: string;
   title: string;
   content: string;
   comments: Comment[];
@@ -64,6 +69,9 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
             {post.comments?.length ? (
               post.comments.map((comment) => (
                 <li key={comment.id} className="border p-2 rounded">
+                  <Link href={`/profile/${comment.userId}`}>
+                    <p className="text-blue-500">{comment.username}</p>
+                  </Link>
                   <p>{comment.text}</p>
                   <small className="text-gray-500">By {comment.author}</small>
                 </li>

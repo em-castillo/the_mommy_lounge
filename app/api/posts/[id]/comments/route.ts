@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { auth } from "@clerk/nextjs/server";
 
 // GET 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -35,6 +36,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // POST 
 export async function POST(req: Request, context: { params: { id: string } }) {
   try {
+    const authData = await auth(); 
+    const userId = authData?.userId; 
+  
+    if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
     const { id } = await context.params;
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
@@ -54,6 +62,7 @@ export async function POST(req: Request, context: { params: { id: string } }) {
 
     const newComment = {
       id: new ObjectId().toString(),
+      userId,
       text,
       author,
       timestamp: new Date().toISOString(),
@@ -78,6 +87,13 @@ export async function POST(req: Request, context: { params: { id: string } }) {
 // PATCH
 export async function PATCH(req: Request, context: { params: { id: string } }) {
   try {
+    const authData = await auth(); 
+    const userId = authData?.userId; 
+  
+    if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
     const { id } = await context.params;
     const body = await req.json();
     const { commentId, newText } = body; // Extract the comment ID and the new text for the comment
@@ -94,6 +110,26 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
+
+   // Find the post containing the comment
+   const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+
+   if (!post) {
+     return NextResponse.json({ error: "Post not found" }, { status: 404 });
+   }
+
+   // Find the specific comment within the post
+   /* eslint-disable @typescript-eslint/no-explicit-any */
+   const comment = post.comments?.find((c: any) => c.id === commentId);
+
+   if (!comment) {
+     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+   }
+
+   // Ensure the user deleting the comment is the author
+   if (comment.userId !== userId) {
+     return NextResponse.json({ error: "Unauthorized to delete this comment" }, { status: 403 });
+   }
 
     // Update the comment
     const result = await postsCollection.updateOne(
@@ -120,6 +156,13 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
 // DELETE 
 export async function DELETE(req: Request,  context: { params: { id: string } }) {
   try {
+    const authData = await auth(); 
+    const userId = authData?.userId; 
+
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
     const { id } = await context.params;
     const body = await req.json();
     const { commentId } = body; // Extract commentId from the body
@@ -136,6 +179,26 @@ export async function DELETE(req: Request,  context: { params: { id: string } })
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
+    // Find the post containing the comment
+    const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    // Find the specific comment within the post
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const comment = post.comments?.find((c: any) => c.id === commentId);
+
+    if (!comment) {
+      return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+    }
+
+    // Ensure the user deleting the comment is the author
+    if (comment.userId !== userId) {
+      return NextResponse.json({ error: "Unauthorized to delete this comment" }, { status: 403 });
+    }
+
     // Delete the comment from the post by comment ID
     const result = await postsCollection.updateOne(
       { _id: new ObjectId(id) }, // Find the post by its ID
@@ -144,7 +207,7 @@ export async function DELETE(req: Request,  context: { params: { id: string } })
     );
 
     if (result.matchedCount === 0) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      return NextResponse.json({ error: "Comment not found" }, { status: 404 });
     }
 
     if (result.modifiedCount === 0) {

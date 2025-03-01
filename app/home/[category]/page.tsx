@@ -9,10 +9,12 @@ import Search from "@/app/ui/home/search";
 import { lusitana } from "@/app/ui/fonts";
 import Link from "next/link";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { SignedIn } from '@clerk/nextjs';
+import { useUser, SignedIn } from '@clerk/nextjs';
 
 interface Post {
   _id: string;
+  userId: string;
+  username: string;
   title: string;
   content: string;
   comments: { id: string }[];
@@ -20,6 +22,8 @@ interface Post {
 
 export default function Page({ params }: { params: Promise<{ category: string }> }) {
 
+    const { user } = useUser(); // Get current signed-in user
+    const userId = user?.id; // Clerk's user ID  
     const { category } = use(params); // Extract category from URL params
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -27,9 +31,9 @@ export default function Page({ params }: { params: Promise<{ category: string }>
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
     // category is decoded to handle special characters 
     const decodedCategory = decodeURIComponent(category);
+
 
    
     useEffect(() => {
@@ -113,9 +117,6 @@ export default function Page({ params }: { params: Promise<{ category: string }>
         </button>
         </SignedIn>
         </div>
-        {/* <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} />
-      </Suspense> */}
 
       <div className="mt-5">
       {loading ? (
@@ -131,6 +132,9 @@ export default function Page({ params }: { params: Promise<{ category: string }>
               <li key={post._id} className="mb-4 w-full">
                 <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
                 <div className="flex flex-col w-full">
+                <Link href={`/profile/${post.userId}`}>
+                  <p className="text-blue-500">{post.username}</p>
+                </Link>
                   <h3 className="font-semibold text-lg">{highlightText(post.title, query)}</h3>
                   <p>{highlightText(post.content, query)}</p>
                   </div>
@@ -143,6 +147,9 @@ export default function Page({ params }: { params: Promise<{ category: string }>
                       <span>{post.comments?.length || 0}</span> {/* Show number of comments */}
                     </button>
                   </Link> 
+                 {/* Show Edit/Delete only if the user is the post owner */}
+                 {userId === post.userId && (
+                      <>
                   {/* Edit Button */}
                   <SignedIn>
                   <Link href={`/home/${category}/edit/${post._id}`}>
@@ -150,12 +157,15 @@ export default function Page({ params }: { params: Promise<{ category: string }>
                     <PencilIcon className="w-5 h-5" />
                     </button>
                   </Link>
+
                   {/* Delete Button */}
                     <button onClick={() => handleDelete(post._id)} 
                      className=" border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
                       <TrashIcon className="w-5 h-5" />
                     </button>
                     </SignedIn>
+                    </>
+                    )}
                   </div>
                   </div>
               </li>

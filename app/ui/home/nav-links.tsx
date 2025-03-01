@@ -1,12 +1,13 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
 import {
   HomeIcon,
   BuildingLibraryIcon,
   UserGroupIcon,
   ScaleIcon,
   PuzzlePieceIcon,
-  HeartIcon
+  HeartIcon,
 } from '@heroicons/react/24/outline';
 // no full refresh in each page as with <a>
 import Link from 'next/link';
@@ -44,6 +45,7 @@ const links = [
 ];
 
 export default function NavLinks() {
+  const { user } = useUser();
   const pathname = usePathname();
   
   return (
@@ -53,7 +55,7 @@ export default function NavLinks() {
         return (
           <Link
             key={link.name}
-            href={link.href}
+            href={link.name === 'Profile' && user ? `/profile/${user.id}` : link.href}
             className={clsx(
               'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3',
               {
