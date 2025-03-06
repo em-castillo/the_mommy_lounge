@@ -21,6 +21,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       { projection: { comments: 1 } } // Fetch only comments
     );
 
+    // Sort comments (newest first)
+    if (post && post.comments) {
+      post.comments.sort((a:{ timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }

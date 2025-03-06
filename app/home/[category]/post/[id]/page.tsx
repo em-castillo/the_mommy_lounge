@@ -11,6 +11,7 @@ interface Post {
   username: string;
   title: string;
   content: string;
+  createdAt: string;
 }
 
 interface Comment {
@@ -37,6 +38,7 @@ export default function PostPage() {
   const [editedText, setEditedText] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [originalText, setOriginalText] = useState('');
+  
 
   // Fetch post and comments
   useEffect(() => {
@@ -83,6 +85,8 @@ export default function PostPage() {
   
     fetchComments();
   }, [id]); // Run the effect when postId changes
+
+  
   
 
 // Add comment
@@ -93,8 +97,6 @@ export default function PostPage() {
     const author = "Anonymous";
 
     try {
-        console.log("Sending Comment:", { text: newComment, author });
-
     const res = await fetch(`/api/posts/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -202,7 +204,10 @@ export default function PostPage() {
 
             <ul className="mt-4 space-y-2">
             {comments.length > 0 ? (
-                comments.map((comment) => (
+                comments
+                .slice()
+                .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                .map((comment) => (
                   <li key={comment.id} className="border p-2 rounded">
                     
                     {/* Display the comment text or editable input if it's being edited */}
@@ -263,6 +268,8 @@ export default function PostPage() {
                 <p className="text-gray-500">No comments yet. Be the first to comment!</p>
             )}
             </ul>
+
+           
 
 
 

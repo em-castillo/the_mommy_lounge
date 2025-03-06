@@ -20,6 +20,7 @@ interface Post {
   username: string;
   title: string;
   content: string;
+  createdAt: string;
   comments: Comment[];
 }
 
@@ -67,7 +68,10 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           <h2 className="mt-6 text-xl font-semibold">Comments</h2>
           <ul className="mt-2 space-y-2">
             {post.comments?.length ? (
-              post.comments.map((comment) => (
+              post.comments
+              .slice()
+              .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+              .map((comment) => (
                 <li key={comment.id} className="border p-2 rounded">
                   <Link href={`/profile/${comment.userId}`}>
                     <p className="text-blue-500">{comment.username}</p>

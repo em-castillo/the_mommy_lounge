@@ -9,7 +9,12 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     let category = url.searchParams.get("category"); // Get category from query params
     const query = url.searchParams.get("query") || "";
+    const page = parseInt(url.searchParams.get("page") || "1", 10); // Default to page 1
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10); // Default to 10 posts per page
 
+    // Calculate the skip value (this determines which posts to fetch)
+    const skip = (page - 1) * limit;
+    
     if (category) {
       category = decodeURIComponent(category); // Decode category 
     }
@@ -33,9 +38,17 @@ export async function GET(req: Request) {
       ];
     }
 
-    const posts = await postsCollection.find(filter).toArray();
+    // Count total matching posts
+    const totalCount = await postsCollection.countDocuments(filter);
 
-    return NextResponse.json(posts, { status: 200 });
+    const posts = await postsCollection
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    return NextResponse.json({ posts, totalCount }, { status: 200 });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
@@ -71,10 +84,10 @@ export async function POST(req: NextRequest) {
     const postsCollection = db.collection("posts");
 
     const result = await postsCollection.insertOne({ 
+      userId, //store user id
       title, 
       category: decodedCategory, 
       content, 
-      userId, //store user id
       createdAt: new Date() });
 
     return NextResponse.json({ message: "Post created", id: result.insertedId }, { status: 201 });

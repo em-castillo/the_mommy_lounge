@@ -8,7 +8,7 @@ import { use } from "react"; //unwrap params
 import Search from "@/app/ui/home/search";
 import { lusitana } from "@/app/ui/fonts";
 import Link from "next/link";
-import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowLongLeftIcon, ArrowLongRightIcon, ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useUser, SignedIn } from '@clerk/nextjs';
 
 interface Post {
@@ -17,6 +17,7 @@ interface Post {
   username: string;
   title: string;
   content: string;
+  createdAt: string;
   comments: { id: string }[];
 }
 
@@ -31,6 +32,11 @@ export default function Page({ params }: { params: Promise<{ category: string }>
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const postsPerPage = 10; // Posts per page
+
     // category is decoded to handle special characters 
     const decodedCategory = decodeURIComponent(category);
 
@@ -40,7 +46,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
       async function fetchPosts() {
         try {
           const res = await fetch(
-            `${process.env.NEXT_PUBLIC_SITE_URL}/api/posts?category=${encodeURIComponent(decodedCategory)}&query=${encodeURIComponent(query)}`,
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/posts?category=${encodeURIComponent(decodedCategory)}&query=${encodeURIComponent(query)}&page=${currentPage}&limit=${postsPerPage}`,
             { cache: "no-store" }
           );
   
@@ -49,7 +55,9 @@ export default function Page({ params }: { params: Promise<{ category: string }>
           }
   
           const data = await res.json();
-          setPosts(data);
+
+          setPosts(data.posts); 
+          setTotalPages(Math.ceil(data.totalCount / postsPerPage)); // Calculate total pages
         } catch (err) {
           setError("Something went wrong while fetching posts.");
           console.error(err);
@@ -61,7 +69,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
       if (decodedCategory) {
         fetchPosts();
       }
-    }, [decodedCategory, query]);
+    }, [decodedCategory, query, currentPage]);
   
     const handleNewPost = () => {
       router.push(`/home/${decodedCategory}/new-post`);
@@ -127,8 +135,10 @@ export default function Page({ params }: { params: Promise<{ category: string }>
           <p>No posts available in this category yet.</p>
         ) : (
           <ul className="w-full flex flex-col items-center">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {posts.map((post: any) => ( 
+            {posts
+            .slice() // Avoid mutating the original state
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((post: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
               <li key={post._id} className="mb-4 w-full">
                 <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
                 <div className="flex flex-col w-full">
@@ -160,7 +170,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
 
                   {/* Delete Button */}
                     <button onClick={() => handleDelete(post._id)} 
-                     className=" border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
+                     className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
                       <TrashIcon className="w-5 h-5" />
                     </button>
                     </SignedIn>
@@ -173,6 +183,44 @@ export default function Page({ params }: { params: Promise<{ category: string }>
           </ul>
         )}
       </div>
+      {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center mt-5 gap-3">
+            
+            {/* Previous Button */}
+            {currentPage > 1 && (
+              <button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded hover:bg-red-50 transition"
+              >
+                <ArrowLongLeftIcon className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Page Numbers */}
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 rounded ${currentPage === page ? "bg-pink-400 text-white" : "border border-pink-200 bg-white text-pink-600 hover:bg-red-50 transition"}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            {currentPage < totalPages && (
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded hover:bg-red-50 transition"
+              >
+                <ArrowLongRightIcon className="w-6 h-6" />
+              </button>
+            )}
+
+          </div>
+        )}
+
       </div>
     );
   }
