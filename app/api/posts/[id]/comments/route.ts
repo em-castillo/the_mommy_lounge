@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/clerk-sdk-node";
 
 // GET 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -21,13 +22,43 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       { projection: { comments: 1 } } // Fetch only comments
     );
 
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
     // Sort comments (newest first)
     if (post && post.comments) {
       post.comments.sort((a:{ timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }
 
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    // Fetch usernames for comments
+    if (post.comments && post.comments.length > 0) {
+      // Get unique user IDs from comments
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userIds = [...new Set(post.comments.map((comment: any) => comment.userId))];
+
+      // Fetch user details from Clerk
+      const users = await Promise.all(
+        userIds.map(async (userId) => {
+          try {
+            const user = await clerkClient.users.getUser(userId);
+            return { userId, username: user?.username || user?.firstName || "Unknown" };
+          } catch (error) {
+            console.error(`Failed to fetch user ${userId}:`, error);
+            return { userId, username: "Unknown" };
+          }
+        })
+      );
+
+      // Create a mapping of userId to username
+      const userMap = Object.fromEntries(users.map((user) => [user.userId, user.username]));
+
+      // Assign usernames to comments
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      post.comments = post.comments.map((comment: any) => ({
+        ...comment,
+        username: userMap[comment.userId] || "Unknown",
+      }));
     }
 
     return NextResponse.json(post.comments || [], { status: 200 });
@@ -54,12 +85,15 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     }
 
     const body = await req.json();
-    // console.log("Received Data:", body);
 
-    const { text, author } = body;
-    if (!text || !author) {
-      return NextResponse.json({ error: "Missing comment text or author" }, { status: 400 });
+    const { text } = body;
+    if (!text) {
+      return NextResponse.json({ error: "Missing comment text" }, { status: 400 });
     }
+
+    // Fetch username from Clerk
+    const user = await clerkClient.users.getUser(userId);
+    const username = user?.username || user?.firstName || "Unknown";
 
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB);
@@ -68,8 +102,8 @@ export async function POST(req: Request, context: { params: { id: string } }) {
     const newComment = {
       id: new ObjectId().toString(),
       userId,
+      username,
       text,
-      author,
       timestamp: new Date().toISOString(),
     };
 

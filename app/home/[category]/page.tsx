@@ -142,10 +142,12 @@ export default function Page({ params }: { params: Promise<{ category: string }>
               <li key={post._id} className="mb-4 w-full">
                 <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
                 <div className="flex flex-col w-full">
-                <Link href={`/profile/${post.userId}`}>
-                  <p className="text-blue-500">{post.username}</p>
-                </Link>
                   <h3 className="font-semibold text-lg">{highlightText(post.title, query)}</h3>
+                  <p className="text-sm text-gray-500">
+                    <strong>{post.username || "Unknown"}</strong>
+                     {/* •{" "} */}
+                    {/* {new Date(post.createdAt).toLocaleString()} */}
+                  </p>
                   <p>{highlightText(post.content, query)}</p>
                   </div>
 

@@ -183,8 +183,8 @@ export default function PostPage() {
     }
   }  
   
-  
-  console.log("Comments array:", comments);
+  // console.log("Comments array:", comments);
+
   return (
     <div className="max-w-2xl mx-auto mt-10">
       {loading ? (
@@ -209,6 +209,8 @@ export default function PostPage() {
                 .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                 .map((comment) => (
                   <li key={comment.id} className="border p-2 rounded">
+                    {/* Display the username above the comment text */}
+                    <p className="font-semibold text-sm text-gray-700">{comment.username || "Unknown"}</p>
                     
                     {/* Display the comment text or editable input if it's being edited */}
                   {editingCommentId === comment.id ? (
@@ -235,6 +237,7 @@ export default function PostPage() {
                     </button>
                   </div>
                 ) : (
+                  
                   <div className="flex justify-between">
                     <p>{comment.text}</p>
 

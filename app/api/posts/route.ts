@@ -2,28 +2,27 @@ import { NextResponse, NextRequest } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/clerk-sdk-node";
+import { User } from "@clerk/clerk-sdk-node";
 
-// GET posts based by category or post ID
+// GET
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    let category = url.searchParams.get("category"); // Get category from query params
+    let category = url.searchParams.get("category"); 
     const query = url.searchParams.get("query") || "";
-    const page = parseInt(url.searchParams.get("page") || "1", 10); // Default to page 1
-    const limit = parseInt(url.searchParams.get("limit") || "10", 10); // Default to 10 posts per page
-
-    // Calculate the skip value (this determines which posts to fetch)
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
     const skip = (page - 1) * limit;
     
     if (category) {
-      category = decodeURIComponent(category); // Decode category 
+      category = decodeURIComponent(category);
     }
 
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
-
-
+    
     const filter: Record<string, unknown> = {};
     
     if (category) {
@@ -47,13 +46,40 @@ export async function GET(req: Request) {
       .skip(skip)
       .limit(limit)
       .toArray();
+      
 
-    return NextResponse.json({ posts, totalCount }, { status: 200 });
-  } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
+    // Get unique userIds from posts
+    const userIds = [...new Set(posts.map((post) => post.userId))];
+
+    // Fetch user details from Clerk for all userIds
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        try {
+          const user = await clerkClient.users.getUser(userId);
+          return { userId, username: user?.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Unknown", };
+        } catch (error) {
+          console.error(`Failed to fetch user ${userId}:`, error);
+          return { userId, username: "Unknown" };
+        }
+      })
+    );
+
+    // Create a user map for quick lookup
+    const userMap = new Map<string, string>(users.map((user: User) => [user.id, user.username || user.firstName || "Unknown"]));
+
+    // Attach username to posts
+    const postsWithUsernames = posts.map(post => ({
+      ...post,
+      username: post.username || userMap.get(post.userId) || "Unknown",
+    }));
+
+    return NextResponse.json({ posts: postsWithUsernames, totalCount }, { status: 200 });
+    } catch (error) {
+      console.error("API Error:", error);
+      return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
+    }
   }
-}
+
 
 // get all posts http://localhost:3000/api/posts
 // get posts by category http://localhost:3000/api/posts?category=momLife
@@ -79,18 +105,27 @@ export async function POST(req: NextRequest) {
 
     const decodedCategory = decodeURIComponent(category);
 
+    // Fetch user details from Clerk
+    const user = await clerkClient.users.getUser(userId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const username = user.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Unknown"; // Get username
+
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB);
     const postsCollection = db.collection("posts");
 
     const result = await postsCollection.insertOne({ 
       userId, //store user id
+      username,
       title, 
       category: decodedCategory, 
       content, 
       createdAt: new Date() });
 
-    return NextResponse.json({ message: "Post created", id: result.insertedId }, { status: 201 });
+    return NextResponse.json({ message: "Post created", id: result.insertedId, username }, { status: 201 });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Failed to create post" }, { status: 500 });

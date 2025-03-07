@@ -3,14 +3,12 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import Link from "next/link";
 
 interface Comment {
   id: string;
   userId: string;
   username: string;
   text: string;
-  author: string;
   timestamp: string;
 }
 
@@ -45,11 +43,12 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
     const res = await fetch(`/api/posts/${id}/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: newComment, author: "User" }), // Change "User" dynamically
+      body: JSON.stringify({ text: newComment }), 
     });
 
     if (res.ok) {
       const { comment } = await res.json();
+      console.log(comment);
       setPost((prev) => prev ? { ...prev, comments: [...prev.comments, comment] } : prev);
       setNewComment("");
     } else {
@@ -62,6 +61,8 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
       {post ? (
         <>
           <h1 className="text-2xl font-bold">{post.title}</h1>
+          <p className="text-sm text-gray-500">
+                    <strong>{post.username || "Unknown"}</strong></p>
           <p className="mt-2">{post.content}</p>
 
           {/* Comment Section */}
@@ -73,11 +74,9 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
               .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
               .map((comment) => (
                 <li key={comment.id} className="border p-2 rounded">
-                  <Link href={`/profile/${comment.userId}`}>
-                    <p className="text-blue-500">{comment.username}</p>
-                  </Link>
+                  <p className="text-sm text-gray-500">
+                  <strong>{comment.username || "Unknown"}</strong></p>
                   <p>{comment.text}</p>
-                  <small className="text-gray-500">By {comment.author}</small>
                 </li>
               ))
             ) : (
