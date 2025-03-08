@@ -3,7 +3,6 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
-import { User } from "@clerk/clerk-sdk-node";
 
 // GET
 export async function GET(req: Request) {
