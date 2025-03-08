@@ -43,13 +43,14 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       const users = await Promise.all(
         uniqueUserIds.map(async (userId) => {
           try {
-            const user = await clerkClient.users.getUser(userId);
+            const user = await clerkClient.users.getUser(userId as string);
             return { userId, username: user.username || user.firstName || "Unknown" };
           } catch {
             return { userId, username: "Unknown" };
           }
         })
       );
+              
 
       // Create a mapping of userId to username
       const userMap = Object.fromEntries(users.map((user) => [user.userId, user.username]));
