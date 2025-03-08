@@ -64,8 +64,10 @@ export async function GET(req: Request) {
     );
 
     // Create a user map for quick lookup
-    const userMap = new Map<string, string>(users.map((user: User) => [user.id, user.username || user.firstName || "Unknown"]));
-
+    const userMap = new Map<string, string>(
+      users.map((user) => [user.userId, user.username || "Unknown"])
+    );
+    
     // Attach username to posts
     const postsWithUsernames = posts.map(post => ({
       ...post,
