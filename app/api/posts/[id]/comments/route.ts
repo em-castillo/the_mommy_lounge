@@ -5,11 +5,13 @@ import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 
 // GET 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const id = params.id; // No need to await
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
 
-    if (!ObjectId.isValid(id)) {
+  try {
+    const params = await context.params;
+    const id = params.id;
+
+    if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
 
@@ -34,17 +36,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // Fetch usernames for comments
     if (post.comments && post.comments.length > 0) {
       // Get unique user IDs from comments
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userIds = [...new Set(post.comments.map((comment: any) => comment.userId))];
+      const userIds = post.comments.map((comment: { userId: string }) => comment.userId);
+      const uniqueUserIds = [...new Set(userIds)]; // Remove duplicates
 
       // Fetch user details from Clerk
       const users = await Promise.all(
-        userIds.map(async (userId) => {
+        uniqueUserIds.map(async (userId) => {
           try {
             const user = await clerkClient.users.getUser(userId);
-            return { userId, username: user?.username || user?.firstName || "Unknown" };
-          } catch (error) {
-            console.error(`Failed to fetch user ${userId}:`, error);
+            return { userId, username: user.username || user.firstName || "Unknown" };
+          } catch {
             return { userId, username: "Unknown" };
           }
         })
