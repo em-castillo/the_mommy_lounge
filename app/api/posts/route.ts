@@ -57,8 +57,7 @@ export async function GET(req: Request) {
         try {
           const user = await clerkClient.users.getUser(userId);
           return { userId, username: user?.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Unknown", };
-        } catch (error) {
-          console.error(`Failed to fetch user ${userId}:`, error);
+        } catch {
           return { userId, username: "Unknown" };
         }
       })

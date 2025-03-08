@@ -5,10 +5,10 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 // GET 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
-   
-    const { id } = await params; 
+    const params = await context.params;
+    const id = params.id; 
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
