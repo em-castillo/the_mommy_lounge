@@ -71,7 +71,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 
 
 // POST 
-export async function POST(req: Request, context: { params: { id: string } }) {
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const authData = await auth(); 
     const userId = authData?.userId; 
