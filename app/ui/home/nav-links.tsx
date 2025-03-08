@@ -2,7 +2,6 @@
 
 import { useUser } from '@clerk/nextjs';
 import {
-  HomeIcon,
   BuildingLibraryIcon,
   UserGroupIcon,
   ScaleIcon,
@@ -16,9 +15,6 @@ import clsx from 'clsx';
 
 
 const links = [
-  { name: 'Home', 
-    href: '/home', 
-    icon: HomeIcon },
   {
     name: 'Pregnancy & newborns',
     href: '/home/Pregnancy & newborns',

@@ -40,7 +40,6 @@ export default function SideNav() {
         {/* Signed-In View */}
         <SignedIn>
           <div className="flex flex-col items-center md:items-start">
-            {/* <UserButton afterSignOutUrl="/" /> */}
 
             <button
               onClick={() => signOut()}
