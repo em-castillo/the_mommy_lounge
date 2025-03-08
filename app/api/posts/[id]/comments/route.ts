@@ -125,7 +125,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 }
 
 // PATCH
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const authData = await auth(); 
     const userId = authData?.userId; 
@@ -194,7 +194,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
 
 
 // DELETE 
-export async function DELETE(req: Request,  context: { params: { id: string } }) {
+export async function DELETE(req: Request,  context: { params: Promise<{ id: string }> }) {
   try {
     const authData = await auth(); 
     const userId = authData?.userId; 
