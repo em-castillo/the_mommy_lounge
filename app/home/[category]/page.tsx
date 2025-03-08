@@ -43,7 +43,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
 
    
     useEffect(() => {
-      fetch('https://the-mommy-lounge-6o2pl0pky-emilys-projects-1e77953c.vercel.app/api/posts?category=Pregnancy%20%26%20newborns&query=&page=1&limit=10')
+      fetch('https://the-mommy-lounge-6o2pl0pky-emilys-projects-1e77953c.vercel.app')
   .then(response => response.json())
   .then(data => {
     console.log('API Response:', data);
