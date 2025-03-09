@@ -43,15 +43,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
 
    
     useEffect(() => {
-      fetch('https://the-mommy-lounge-6o2pl0pky-emilys-projects-1e77953c.vercel.app')
-  .then(response => response.json())
-  .then(data => {
-    console.log('API Response:', data);
-    // Process and display the posts here
-  })
-  .catch(error => {
-    console.error('Error fetching posts:', error);
-  });
+
 
       async function fetchPosts() {
         try {
