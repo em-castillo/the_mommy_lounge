@@ -49,7 +49,9 @@ export default function Page({ params }: { params: Promise<{ category: string }>
         try {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/posts?category=${encodeURIComponent(decodedCategory)}&query=${encodeURIComponent(query)}&page=${currentPage}&limit=${postsPerPage}`,
-            { cache: "no-store" }
+            { cache: "no-store",
+              mode: 'no-cors',
+             }
           );
   
           if (!res.ok) {
