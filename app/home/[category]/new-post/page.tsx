@@ -57,6 +57,7 @@ export default function NewPostPage({ params }: { params: Promise<{ category: st
         <button 
           type="submit" 
           disabled={loading}
+          title="Post"
           className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition disabled:bg-gray-400"
         >
           {loading ? "Posting..." : "Post"}

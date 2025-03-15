@@ -123,6 +123,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
           <SignedIn>
           <button 
             onClick={handleNewPost} 
+            title="New post"
             className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition"
         >
           New Post
@@ -144,46 +145,47 @@ export default function Page({ params }: { params: Promise<{ category: string }>
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .map((post: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
               <li key={post._id} className="mb-4 w-full">
-                <div className="border p-4 rounded-lg shadow-md  flex justify-between items-start">
-                <div className="flex flex-col w-full">
-                  <h3 className="font-semibold text-lg">{highlightText(post.title, query)}</h3>
-                  <p className="text-sm text-gray-500">
-                    <strong>{post.username || "Unknown"}</strong>
-                     {/* •{" "} */}
-                    {/* {new Date(post.createdAt).toLocaleString()} */}
-                  </p>
-                  <p>{highlightText(post.content, query)}</p>
+                <div className="border p-4 rounded-lg shadow-md flex justify-between items-start">
+                  <div className="flex flex-col w-full">
+                    <h3 className="font-semibold text-lg">{highlightText(post.title, query)}</h3>
+                    <p className="text-sm text-gray-500">
+                      <strong>{post.username || "Unknown"}</strong>
+                      {/* •{" "} */}
+                      {/* {new Date(post.createdAt).toLocaleString()} */}
+                    </p>
+                    <p>{highlightText(post.content, query)}</p>
                   </div>
 
-                  <div className="ml-4 flex justify-between gap-2">
+                  <div className="ml-4 flex gap-2 flex-col md:flex-row md:items-center">
                     {/* Comment Button */}
-                  <Link href={`/home/${category}/post/${post._id}`}>
-                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition flex items-center gap-1">
-                      <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-                      <span>{post.comments?.length || 0}</span> {/* Show number of comments */}
-                    </button>
-                  </Link> 
-                 {/* Show Edit/Delete only if the user is the post owner */}
-                 {userId === post.userId && (
-                      <>
-                  {/* Edit Button */}
-                  <SignedIn>
-                  <Link href={`/home/${category}/edit/${post._id}`}>
-                    <button className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
-                    <PencilIcon className="w-5 h-5" />
-                    </button>
-                  </Link>
+                    <Link href={`/home/${category}/post/${post._id}`}>
+                      <button title="Comments" className="border border-pink-200 bg-white text-pink-600 px-3 py-3 rounded mb-2 hover:bg-red-50 transition flex items-center justify-center gap-1 w-full md:w-auto h-10 md:h-10">
+                        <ChatBubbleOvalLeftIcon className="w-5 h-5" />
+                        <span>{post.comments?.length || 0}</span> {/* Show number of comments */}
+                      </button>
+                    </Link> 
 
-                  {/* Delete Button */}
-                    <button onClick={() => handleDelete(post._id)} 
-                     className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition">
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                    </SignedIn>
-                    </>
+                    {/* Show Edit/Delete only if the user is the post owner */}
+                    {userId === post.userId && (
+                      <>
+                        {/* Edit Button */}
+                        <SignedIn>
+                          <Link href={`/home/${category}/edit/${post._id}`}>
+                            <button title="Edit" className="border border-pink-200 bg-white text-pink-600 px-3 py-3 rounded mb-2 hover:bg-red-50 transition flex items-center justify-center gap-1 w-full md:w-auto h-10 md:h-10">
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                          </Link>
+
+                          {/* Delete Button */}
+                          <button onClick={() => handleDelete(post._id)} title="Delete"
+                            className="border border-pink-200 bg-white text-pink-600 px-3 py-3 rounded mb-2 hover:bg-red-50 transition flex items-center justify-center gap-1 w-full md:w-auto h-10 md:h-10">
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
+                        </SignedIn>
+                      </>
                     )}
                   </div>
-                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -196,7 +198,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
             {/* Previous Button */}
             {currentPage > 1 && (
               <button
-                onClick={() => setCurrentPage(currentPage - 1)}
+                onClick={() => setCurrentPage(currentPage - 1)} title="Previous"
                 className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded hover:bg-red-50 transition"
               >
                 <ArrowLongLeftIcon className="w-6 h-6" />
@@ -217,7 +219,7 @@ export default function Page({ params }: { params: Promise<{ category: string }>
             {/* Next Button */}
             {currentPage < totalPages && (
               <button
-                onClick={() => setCurrentPage(currentPage + 1)}
+                onClick={() => setCurrentPage(currentPage + 1)} title="Next"
                 className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded hover:bg-red-50 transition"
               >
                 <ArrowLongRightIcon className="w-6 h-6" />

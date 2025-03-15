@@ -24,7 +24,7 @@ export default function SideNav() {
         <NavLinks />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 md:gap-0">
         {/* Show Profile Link only if signed in */}
         <SignedIn>
           <Link href="/home/profile" title="Profile">

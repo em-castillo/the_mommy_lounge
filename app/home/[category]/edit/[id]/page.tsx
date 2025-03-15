@@ -64,7 +64,9 @@ export default function EditPostPage({ params }: { params: Promise<{ category: s
           placeholder="Content"
           className="border p-2 rounded h-32"
         />
-        <button type="submit" className="bg-red-200 text-pink-600 px-4 py-2 rounded">
+        <button type="submit" 
+        title="Update"
+        className="bg-red-200 text-pink-600 px-4 py-2 rounded">
           Update
         </button>
       </form>
