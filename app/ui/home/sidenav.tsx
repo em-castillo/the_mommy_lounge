@@ -12,7 +12,7 @@ export default function SideNav() {
   return (
     <div className="flex h-full flex-col px-3 py-4 md:px-2 ">
       <Link
-        className="mb-2 flex h-20 items-end justify-start rounded-md bg-red-200 p-4 md:h-40"
+        className="mb-2 flex h-40 items-end justify-start rounded-md bg-red-200 p-4 md:h-40"
         href="/"
       >
         <div className="w-32 text-black md:w-80">
@@ -27,7 +27,7 @@ export default function SideNav() {
         <div className="flex flex-col gap-2">
         {/* Show Profile Link only if signed in */}
         <SignedIn>
-          <Link href="/home/profile">
+          <Link href="/home/profile" title="Profile">
             <button 
             className="flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
               <UserIcon className="w-6" />
@@ -43,8 +43,9 @@ export default function SideNav() {
 
             <button
               onClick={() => signOut()}
+              title="Sign out"
               className="flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
-              <PowerIcon className="w-6" />
+              <PowerIcon className="w-6"/>
               <div className="hidden md:block">Sign Out</div>
             </button>
           </div>
@@ -53,8 +54,8 @@ export default function SideNav() {
         {/* Signed-Out View */}
         <SignedOut>
           <SignInButton mode="modal">
-            <button className="flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
-              <PowerIcon className="w-6" />
+            <button title="Sign in" className="flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
+              <PowerIcon className="w-6"/>
               <div className="hidden md:block">Sign In</div>
             </button>
           </SignInButton>
