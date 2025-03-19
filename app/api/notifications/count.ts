@@ -12,9 +12,12 @@ export async function GET(req: NextRequest) {
     const { db } = await connectToDatabase();
 
     // Fetch the count of unread notifications for the user
+    console.log("Fetching notifications for userId:", userId);
     const notificationsCount = await db
       .collection("notifications")
-      .countDocuments({ userId, isRead: false }); // assuming 'isRead' field marks notifications as read
+      .countDocuments({ userId, isRead: false });
+    console.log("Unread notifications count:", notificationsCount);
+
 
     return NextResponse.json({ count: notificationsCount });
   } catch (error) {

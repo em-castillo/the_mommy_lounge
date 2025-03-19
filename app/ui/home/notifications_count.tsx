@@ -12,7 +12,7 @@ export default function NotificationsButton() {
     const fetchNotificationCount = async () => {
       try {
         const res = await fetch("/api/notifications/count"); // API route to get unread notifications count
-        if (!res.ok) throw new Error("Failed to fetch notifications count");
+        if (!res.ok) throw new Error("Failed to fetch notifications count: ${res.statusText}");
         const data = await res.json();
         setNotificationCount(data.count); // Update the notification count
       } catch (error) {
