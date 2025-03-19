@@ -48,7 +48,7 @@ export default function UserLinks() {
           <SignInButton mode="modal">
             <button title="Sign in" className="flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
               <PowerIcon className="w-6"/>
-              <div className="hidden md:block">Sign In</div>
+              <div>Sign In</div>
             </button>
           </SignInButton>
         </SignedOut>
