@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/utils/db";
 import { auth } from "@clerk/nextjs/server";
+import { ObjectId } from "mongodb";
 
 export async function PUT(req: Request, { params }: { params: { notificationId: string } }) {
   try {
@@ -11,17 +12,23 @@ export async function PUT(req: Request, { params }: { params: { notificationId: 
 
     const { db } = await connectToDatabase();
 
+    const notificationObjectId = new ObjectId(params.notificationId);
+
     // Mark the notification as read
     const result = await db
       .collection("notifications")
-      .updateOne({ _id: params.notificationId, userId }, { $set: { isRead: true } });
+      .updateOne(
+        { _id: notificationObjectId, userId }, 
+        { $set: { isRead: true } }
+      );
 
     if (result.modifiedCount === 0) {
       return NextResponse.json({ error: "Notification not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to update notification" }, { status: 500 });
   }
 }
