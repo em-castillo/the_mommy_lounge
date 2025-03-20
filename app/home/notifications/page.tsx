@@ -16,6 +16,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { userId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationCount, setNotificationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,8 +42,10 @@ export default function NotificationsPage() {
       method: "PUT",
     });
     setNotifications((prev) =>
-      prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
-    );
+        prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
+      );
+  
+    setNotificationCount((prevCount) => prevCount - 1);
   }
 
   return (
@@ -51,6 +54,15 @@ export default function NotificationsPage() {
         <BellIcon className="w-6 h-6" />
         Notifications
       </h2>
+
+      <div className="relative">
+        {/* Notification count next to the bell icon */}
+        {notificationCount > 0 && (
+          <span className="absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+            {notificationCount}
+          </span>
+        )}
+      </div>
 
       {loading ? (
         <p>Loading notifications...</p>
