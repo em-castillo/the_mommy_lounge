@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { connectToDatabase } from "@/utils/db";
 import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
@@ -25,8 +25,9 @@ export async function GET(req: NextRequest) {
       category = decodeURIComponent(category);
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    // const client = await clientPromise;
+    // const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
     
     const filter: Record<string, unknown> = {};
@@ -120,8 +121,7 @@ export async function POST(req: NextRequest) {
 
     const username = user.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Unknown"; // Get username
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
     const result = await postsCollection.insertOne({ 
@@ -160,8 +160,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
   // Ensure the post belongs to the user
@@ -216,8 +215,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
     const post = await postsCollection.findOne({ _id: new ObjectId(id) });

@@ -1,7 +1,7 @@
 // POSTS BY ID ROUTE
 
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { connectToDatabase } from "@/utils/db";
 import { ObjectId } from "mongodb";
 
 // GET 
@@ -21,8 +21,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
     const post = await postsCollection.findOne({ _id: new ObjectId(id) });

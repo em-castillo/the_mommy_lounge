@@ -1,8 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import clientPromise from "@/lib/mongodb";
+// import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
+import { connectToDatabase } from "@/utils/db";
 
 // GET 
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Invalid post ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    // const client = await clientPromise;
+    // const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
     const post = await postsCollection.findOne(
@@ -87,8 +89,8 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     }
 
     const body = await req.json();
-
     const { text } = body;
+
     if (!text) {
       return NextResponse.json({ error: "Missing comment text" }, { status: 400 });
     }
@@ -97,9 +99,18 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const user = await clerkClient.users.getUser(userId);
     const username = user?.username || user?.firstName || "Unknown";
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
+    const notificationsCollection = db.collection("notifications");
+
+    // Find the post to get the post owner's ID
+    const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    const postOwnerId = post.userId; // Assuming the post has a `userId` field
 
     const newComment = {
       id: new ObjectId().toString(),
@@ -116,6 +127,19 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     if (!result.modifiedCount) {
       return NextResponse.json({ error: "Failed to add comment" }, { status: 500 });
+    }
+
+    // Create a notification for the post owner (if the commenter is not the owner)
+    if (postOwnerId !== userId) {
+      const notification = {
+        userId: postOwnerId, // Notify the post owner
+        postId: id, // The post that received the comment
+        message: `New comment on your post: "${text}"`,
+        isRead: false,
+        createdAt: new Date(),
+      };
+
+      await notificationsCollection.insertOne(notification);
     }
 
     return NextResponse.json({ comment: newComment }, { status: 201 });
@@ -148,8 +172,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
    // Find the post containing the comment
@@ -216,8 +239,7 @@ export async function DELETE(req: Request,  context: { params: Promise<{ id: str
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGODB_DB);
+    const { db } = await connectToDatabase();
     const postsCollection = db.collection("posts");
 
     // Find the post containing the comment
