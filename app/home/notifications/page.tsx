@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { BellIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 interface Notification {
   _id: string;
@@ -71,11 +72,17 @@ export default function NotificationsPage() {
               {!notification.isRead && (
                 <button
                   onClick={() => markAsRead(notification._id)}
-                  className="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded"
+                  className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
                 >
                   Mark as Read
                 </button>
               )}
+              <Link
+                  href={`/posts/${notification.postId}`}
+                  className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
+                >
+                  Go to Comment
+                </Link>
             </li>
           ))}
         </ul>
