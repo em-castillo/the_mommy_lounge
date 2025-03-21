@@ -7,7 +7,9 @@ import Link from "next/link";
 
 interface Notification {
   _id: string;
+  userId: string;
   postId: string;
+  commentId?: string;
   message: string;
   isRead: boolean;
   createdAt: string;
@@ -16,6 +18,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { userId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -70,14 +73,14 @@ export default function NotificationsPage() {
         Notifications
       </h2>
 
-      <div className="relative">
+      {/* <div className="relative">
         {/* Notification count next to the bell icon */}
-        {notificationCount > 0 && (
+        {/* {notificationCount > 0 && (
           <span className="absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
             {notificationCount}
           </span>
         )}
-      </div>
+      </div> */} 
 
       {loading ? (
         <p>Loading notifications...</p>
@@ -106,7 +109,7 @@ export default function NotificationsPage() {
                 </button>
               )}
               <Link
-                  href={`/posts/${notification.postId}`}
+                  href={`/posts/${notification.postId}?comment=${notification.commentId}`}
                   className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
                 >
                   Go to Comment

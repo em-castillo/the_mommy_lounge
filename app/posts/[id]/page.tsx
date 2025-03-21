@@ -2,7 +2,7 @@
 
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 
 interface Comment {
   id: string;
@@ -26,6 +26,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   const [post, setPost] = useState<Post | null>(null);
   const [newComment, setNewComment] = useState("");
+  const commentRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
 
   useEffect(() => {
     async function fetchPost() {
@@ -36,6 +37,16 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
     }
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get("commentId");
+
+    if (commentId && commentRefs.current[commentId]) {
+      commentRefs.current[commentId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [post]);
+
 
   async function handleAddComment() {
     if (!newComment.trim()) return;
@@ -62,7 +73,8 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
         <>
           <h1 className="text-2xl font-bold">{post.title}</h1>
           <p className="text-sm text-gray-500">
-                    <strong>{post.username || "Unknown"}</strong></p>
+                    <strong>{post.username || "Unknown"}</strong>
+          </p>
           <p className="mt-2">{post.content}</p>
 
           {/* Comment Section */}
@@ -73,9 +85,11 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
               .slice()
               .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
               .map((comment) => (
-                <li key={comment.id} className="border p-2 rounded">
+                <li 
+                key={comment.id} 
+                className="border p-2 rounded">
                   <p className="text-sm text-gray-500">
-                  <strong>{comment.username || "Unknown"}</strong></p>
+                    <strong>{comment.username || "Unknown"}</strong></p>
                   <p>{comment.text}</p>
                 </li>
               ))

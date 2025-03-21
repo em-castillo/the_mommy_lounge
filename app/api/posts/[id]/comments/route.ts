@@ -134,6 +134,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       const notification = {
         userId: postOwnerId, // Notify the post owner
         postId: id, // The post that received the comment
+        commentId: newComment.id, // The new comment ID
         message: `New comment on your post: "${text}"`,
         isRead: false,
         createdAt: new Date(),
