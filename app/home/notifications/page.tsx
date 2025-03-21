@@ -27,6 +27,7 @@ export default function NotificationsPage() {
         const res = await fetch(`/api/notifications?userId=${userId}`);
         const data = await res.json();
         setNotifications(data);
+        setNotificationCount(data.filter((notification: Notification) => !notification.isRead).length);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
@@ -81,6 +82,7 @@ export default function NotificationsPage() {
               <div className="text-xs text-gray-500">
                 {new Date(notification.createdAt).toLocaleString()}
               </div>
+              <div className="flex gap-2">
               {!notification.isRead && (
                 <button
                   onClick={() => markAsRead(notification._id)}
@@ -95,6 +97,7 @@ export default function NotificationsPage() {
                 >
                   Go to Comment
                 </Link>
+                </div>
             </li>
           ))}
         </ul>
