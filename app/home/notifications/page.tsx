@@ -61,7 +61,10 @@ export default function NotificationsPage() {
       );
   
       // Update notification count
-      setNotificationCount((prevCount) => prevCount - 1);
+      setNotificationCount((prevCount) => {
+        const newCount = prevCount - 1;
+        return newCount >= 0 ? newCount : 0;
+      });
   
       // Debug: Log the updated states
       console.log('Updated notifications:', notifications);
