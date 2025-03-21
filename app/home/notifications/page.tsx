@@ -73,14 +73,6 @@ export default function NotificationsPage() {
         Notifications
       </h2>
 
-      {/* <div className="relative">
-        {/* Notification count next to the bell icon */}
-        {/* {notificationCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-            {notificationCount}
-          </span>
-        )}
-      </div> */} 
 
       {loading ? (
         <p>Loading notifications...</p>
