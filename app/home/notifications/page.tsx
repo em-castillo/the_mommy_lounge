@@ -18,7 +18,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { userId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  /* eslint-disable @typescript-eslint/no-unused-vars */
+//   /* eslint-disable @typescript-eslint/no-unused-vars */
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -53,17 +53,25 @@ export default function NotificationsPage() {
         throw new Error("Failed to mark notification as read");
       }
   
+      // Update notifications state
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, isRead: true } : n
         )
       );
   
+      // Update notification count
       setNotificationCount((prevCount) => prevCount - 1);
+  
+      // Debug: Log the updated states
+      console.log('Updated notifications:', notifications);
+      console.log('Updated notification count:', notificationCount);
+  
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   }
+  
   
 
   return (
