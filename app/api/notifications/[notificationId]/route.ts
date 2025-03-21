@@ -3,7 +3,7 @@ import { connectToDatabase } from "@/utils/db";
 import { auth } from "@clerk/nextjs/server";
 import { ObjectId } from "mongodb";
 
-export async function PUT(req: Request, context: { params: { notificationId: string } }) {
+export async function PUT(req: Request, context: { params: Promise<{ notificationId: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -11,8 +11,8 @@ export async function PUT(req: Request, context: { params: { notificationId: str
     }
 
     const { db } = await connectToDatabase();
-
-    const notificationId = context.params.notificationId; 
+    const params = await context.params;
+    const notificationId = params.notificationId; 
 
     if (!notificationId) {
       return NextResponse.json({ error: "Invalid notification ID" }, { status: 400 });
