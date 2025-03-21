@@ -51,7 +51,6 @@ export default function NotificationsPage() {
     
         setNotificationCount((prevCount) => prevCount - 1);
 
-        fetchNotifications();
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
