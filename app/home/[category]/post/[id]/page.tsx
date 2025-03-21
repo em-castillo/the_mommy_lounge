@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useUser, SignedIn } from '@clerk/nextjs';
@@ -38,6 +38,9 @@ export default function PostPage() {
   const [editedText, setEditedText] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [originalText, setOriginalText] = useState('');
+  
+  // Define a ref object to hold the references to each comment
+  const commentRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
   
 
   // Fetch post and comments
@@ -87,7 +90,15 @@ export default function PostPage() {
   }, [id]); // Run the effect when postId changes
 
   
-  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get("commentId");
+
+    if (commentId && commentRefs.current[commentId]) {
+      commentRefs.current[commentId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [post]);
+
 
 // Add comment
   async function handleAddComment(e: React.FormEvent) {
@@ -119,7 +130,6 @@ export default function PostPage() {
   }
 
   // Edit comment
-  // edit button
   function handleEditButtonClick(commentId: string, currentText: string) {
     setEditedText(currentText); // Set the current text of the comment to the input
     setOriginalText(currentText);
@@ -183,8 +193,6 @@ export default function PostPage() {
     }
   }  
   
-  // console.log("Comments array:", comments);
-
   return (
     <div className="max-w-2xl mx-auto mt-10">
       {loading ? (
@@ -203,94 +211,95 @@ export default function PostPage() {
             </h2>
 
             <ul className="mt-4 space-y-2">
-            {comments.length > 0 ? (
+              {comments.length > 0 ? (
                 comments
-                .slice()
-                .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                .map((comment) => (
-                  <li key={comment.id} className="border p-2 rounded">
-                    {/* Display the username above the comment text */}
-                    <p className="font-semibold text-sm text-gray-700">{comment.username || "Unknown"}</p>
+                  .slice()
+                  .sort((a: Comment, b: Comment) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                  .map((comment) => (
+                    <li
+                      key={comment.id}
+                      id={`comment=${comment.id}`} // Set the comment's ID as the HTML ID
+                      ref={(el) => { commentRefs.current[comment.id] = el }} // Use useRef callback to assign the ref
+                      className="border p-2 rounded"
+                    >
+                      <p className="font-semibold text-sm text-gray-700">{comment.username || "Unknown"}</p>
 
-                    {/* Display the comment text or editable input if it's being edited */}
-                    {editingCommentId === comment.id ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          name="text"
-                          value={editedText}
-                          onChange={(e) => setEditedText(e.target.value)}
-                          className="border p-1 rounded w-full"
-                          placeholder="Edit your comment..."
-                        />
-                        <button
-                          onClick={() => handleSaveButtonClick(comment.id)}  title="Save"
-                          className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancelButtonClick} title="Cancel"
-                          className="border border-gray-200 bg-white text-gray-600 px-3 py-1 rounded mb-2 hover:bg-gray-50 transition"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between">
-                        <p>{comment.text}</p>
+                      {editingCommentId === comment.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            name="text"
+                            value={editedText}
+                            onChange={(e) => setEditedText(e.target.value)}
+                            className="border p-1 rounded w-full"
+                            placeholder="Edit your comment..."
+                          />
+                          <button
+                            onClick={() => handleSaveButtonClick(comment.id)}  title="Save"
+                            className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelButtonClick} title="Cancel"
+                            className="border border-gray-200 bg-white text-gray-600 px-3 py-1 rounded mb-2 hover:bg-gray-50 transition"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between">
+                          <p>{comment.text}</p>
+                          {/* Show Edit/Delete only if the user is the post owner */}
+                          {userId === comment.userId && (
+                            <SignedIn>
+                              <div className="flex gap-2 flex-col md:flex-row md:items-center">
+                                <button
+                                  onClick={() => handleEditButtonClick(comment.id, comment.text)} // Set the current text to edit
+                                  title="Edit"
+                                  className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition w-full md:w-auto"
+                                >
+                                  <PencilIcon className="w-5 h-5" />
+                                </button>
 
-                        {/* Show Edit/Delete only if the user is the post owner */}
-                        {userId === comment.userId && (
-                          <SignedIn>
-                            <div className="flex gap-2 flex-col md:flex-row md:items-center">
-                              <button
-                                onClick={() => handleEditButtonClick(comment.id, comment.text)} // Set the current text to edit
-                                title="Edit"
-                                className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition w-full md:w-auto"
-                              >
-                                <PencilIcon className="w-5 h-5" />
-                              </button>
-
-                              <button 
-                                onClick={() => handleDeleteButtonClick(comment.id)}
-                                title="Delete"
-                                className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition w-full md:w-auto"
-                              >
-                                <TrashIcon className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </SignedIn>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                ))
-            ) : (
+                                <button
+                                  onClick={() => handleDeleteButtonClick(comment.id)}
+                                  title="Delete"
+                                  className="border border-pink-200 bg-white text-pink-600 px-3 py-1 rounded mb-2 hover:bg-red-50 transition w-full md:w-auto"
+                                >
+                                  <TrashIcon className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </SignedIn>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  ))
+              ) : (
                 <p className="text-gray-500">No comments yet. Be the first to comment!</p>
-            )}
+              )}
             </ul>
 
             {/* Add Comment Form */}
             <SignedIn>
-            <form onSubmit={handleAddComment} className="mt-4 flex gap-2">
-              <input
-                type="text"
-                name="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
-                className="border p-2 flex-1 rounded"
-              />
-              <button
-                type="submit" title="Comment"
-                className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition"
-              >
-                Comment
-              </button>
-            </form>
+              <form onSubmit={handleAddComment} className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  name="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="border p-2 flex-1 rounded"
+                />
+                <button
+                  type="submit" title="Comment"
+                  className="bg-red-200 text-pink-600 px-4 py-2 rounded-lg shadow-md hover:bg-red-300 transition"
+                >
+                  Comment
+                </button>
+              </form>
             </SignedIn>
-        
           </div>
         </>
       ) : (
