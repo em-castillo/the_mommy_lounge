@@ -22,8 +22,6 @@ export default function NotificationsPage() {
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch(`/api/notifications?userId=${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch notifications");
-  
       const data: Notification[] = await res.json();
       setNotifications(data);
       setNotificationCount(data.filter((notification) => !notification.isRead).length);
@@ -33,23 +31,31 @@ export default function NotificationsPage() {
       setLoading(false);
     }
   }, [userId]); 
-  
+
+
   useEffect(() => {
     if (!userId) return;
     fetchNotifications();
-  }, [userId, fetchNotifications]); 
-  
+  }, [userId, fetchNotifications]);
+
+
   async function markAsRead(notificationId: string) {
     try {
-      const res = await fetch(`/api/notifications/${notificationId}`, { method: "PUT" });
-      if (!res.ok) throw new Error("Failed to mark notification as read");
-  
-      fetchNotifications(); 
+        await fetch(`/api/notifications/${notificationId}`, {
+          method: "PUT",
+        });
+
+        setNotifications((prev) =>
+            prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
+        );
+    
+        setNotificationCount((prevCount) => prevCount - 1);
+
+        fetchNotifications();
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   }
-  
 
   return (
     <div className="p-4">
