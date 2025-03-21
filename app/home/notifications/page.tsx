@@ -17,7 +17,7 @@
   }
   
   // Define the NotificationsPageProps interface
-  export interface NotificationsPageProps {
+interface NotificationsPageProps {
     notificationCount: number;
     setNotificationCount: React.Dispatch<React.SetStateAction<number>>;
   }
