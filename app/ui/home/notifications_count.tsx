@@ -1,28 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { SignedIn } from "@clerk/nextjs";
 import { BellIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-export default function NotificationsButton() {
-  const [notificationCount, setNotificationCount] = useState<number>(0);
+interface NotificationsButtonProps {
+  notificationCount: number;
+}
 
-  useEffect(() => {
-    const fetchNotificationCount = async () => {
-      try {
-        const res = await fetch("/api/notifications/count"); 
-        if (!res.ok) throw new Error("Failed to fetch notifications count");
-        const data = await res.json();
-        setNotificationCount(data.count); // Update the notification count
-      } catch (error) {
-        console.error("Error fetching notifications count:", error);
-      }
-    };
-
-    fetchNotificationCount();
-  }, []); // Only run once when the component mounts
-
+export default function NotificationsButton({ notificationCount }: NotificationsButtonProps) {
   return (
     <SignedIn>
       <Link href="/home/notifications">
