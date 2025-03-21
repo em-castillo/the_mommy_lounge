@@ -18,7 +18,7 @@ interface Notification {
 export default function NotificationsPage() {
   const { userId } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-//   /* eslint-disable @typescript-eslint/no-unused-vars */
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -61,14 +61,13 @@ export default function NotificationsPage() {
       );
   
       // Update notification count
-      setNotificationCount((prevCount) => {
-        const newCount = prevCount - 1;
-        return newCount >= 0 ? newCount : 0;
-      });
-  
-      // Debug: Log the updated states
-      console.log('Updated notifications:', notifications);
-      console.log('Updated notification count:', notificationCount);
+      setNotificationCount((prevCount) => prevCount - 1);
+
+    // Manually fetch updated notification count from the sidebar
+    const resCount = await fetch("/api/notifications/count");
+    if (!resCount.ok) throw new Error("Failed to fetch updated notification count");
+    const data = await resCount.json();
+    setNotificationCount(data.count);
   
     } catch (error) {
       console.error("Error marking notification as read:", error);
