@@ -30,6 +30,7 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
+    fetchNotifications()
   }, [userId]); 
 
 
@@ -41,20 +42,26 @@ export default function NotificationsPage() {
 
   async function markAsRead(notificationId: string) {
     try {
-        await fetch(`/api/notifications/${notificationId}`, {
-          method: "PUT",
-        });
-
-        setNotifications((prev) =>
-            prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
-        );
-    
-        setNotificationCount((prevCount) => prevCount - 1);
-
+      const res = await fetch(`/api/notifications/${notificationId}`, {
+        method: "PUT",
+      });
+  
+      if (!res.ok) {
+        throw new Error("Failed to mark notification as read");
+      }
+  
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notificationId ? { ...n, isRead: true } : n
+        )
+      );
+  
+      setNotificationCount((prevCount) => prevCount - 1);
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   }
+  
 
   return (
     <div className="p-4">
