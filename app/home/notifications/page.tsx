@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { BellIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -19,35 +19,37 @@ export default function NotificationsPage() {
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/notifications?userId=${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch notifications");
+  
+      const data: Notification[] = await res.json();
+      setNotifications(data);
+      setNotificationCount(data.filter((notification) => !notification.isRead).length);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]); 
+  
   useEffect(() => {
     if (!userId) return;
-
-    async function fetchNotifications() {
-      try {
-        const res = await fetch(`/api/notifications?userId=${userId}`);
-        const data = await res.json();
-        setNotifications(data);
-        setNotificationCount(data.filter((notification: Notification) => !notification.isRead).length);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchNotifications();
-  }, [userId]);
-
-  async function markAsRead(notificationId: string) {
-    await fetch(`/api/notifications/${notificationId}`, {
-      method: "PUT",
-    });
-    setNotifications((prev) =>
-        prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
-      );
+  }, [userId, fetchNotifications]); 
   
-    setNotificationCount((prevCount) => prevCount - 1);
+  async function markAsRead(notificationId: string) {
+    try {
+      const res = await fetch(`/api/notifications/${notificationId}`, { method: "PUT" });
+      if (!res.ok) throw new Error("Failed to mark notification as read");
+  
+      fetchNotifications(); 
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
   }
+  
 
   return (
     <div className="p-4">
