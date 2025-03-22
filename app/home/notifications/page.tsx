@@ -72,7 +72,7 @@
 
     function handleGoToComment(postId: string, commentId: string | undefined) {
         if (commentId) { 
-          router.push(`/home/${postId}/post/${commentId}?commentId=${commentId}`);
+          router.push(`/${postId}/post/${commentId}?commentId=${commentId}`);
         } else {
           console.error("Comment ID is not available");
         }
@@ -113,7 +113,8 @@
                   )}
                   {notification.commentId && (
                     <button
-                        onClick={() => handleGoToComment(notification.postId, notification.commentId)} // Ensure commentId is passed correctly
+                        onClick={() => handleGoToComment(notification.postId, notification.commentId)} 
+                        className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
                     >
                         Go to comment
                     </button>

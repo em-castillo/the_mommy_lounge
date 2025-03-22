@@ -2,7 +2,7 @@
 
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 
 interface Comment {
   id: string;
@@ -26,6 +26,8 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   const [post, setPost] = useState<Post | null>(null);
   const [newComment, setNewComment] = useState("");
+  const commentRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
+
 
   useEffect(() => {
     async function fetchPost() {
@@ -36,6 +38,15 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
     }
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get("commentId");
+
+    if (commentId && commentRefs.current[commentId]) {
+      commentRefs.current[commentId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [post]);
 
 
   async function handleAddComment() {
@@ -77,6 +88,8 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
               .map((comment) => (
                 <li 
                 key={comment.id} 
+                id={`comment=${comment.id}`} // Set the comment's ID as the HTML ID
+                ref={(el) => { commentRefs.current[comment.id] = el }} // Use useRef callback to assign the ref
                 className="border p-2 rounded">
                   <p className="text-sm text-gray-500">
                     <strong>{comment.username || "Unknown"}</strong></p>
