@@ -4,6 +4,8 @@
   import { useAuth } from "@clerk/nextjs";
   import { BellIcon } from "@heroicons/react/24/outline";
   import Link from "next/link";
+  import { useNotifications } from "../../context/NotificationsContext";
+
   
   // Define the Notification type
   interface Notification {
@@ -20,8 +22,7 @@
   export default function NotificationsPage() {
     const { userId } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [notificationCount, setNotificationCount] = useState<number>(0);
+    const { notificationCount, setNotificationCount, refreshNotificationCount } = useNotifications();
     const [loading, setLoading] = useState(true);
   
     const fetchNotifications = useCallback(async () => {
@@ -35,7 +36,7 @@
       } finally {
         setLoading(false);
       }
-    }, [userId]);
+    }, [userId, setNotificationCount]);
   
     useEffect(() => {
       if (!userId) return;
@@ -60,7 +61,9 @@
         );
   
         // Decrease the notification count
-        setNotificationCount((prevCount) => Math.max(0, prevCount - 1));
+        setNotificationCount(Math.max(notificationCount - 1, 0));  
+              
+        await refreshNotificationCount();
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
