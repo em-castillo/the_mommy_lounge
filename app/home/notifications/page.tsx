@@ -72,7 +72,7 @@
 
     function handleGoToComment(postId: string, commentId: string | undefined) {
         if (commentId) { 
-          router.push(`/${postId}/post/${commentId}?commentId=${commentId}`);
+          router.push(`/posts/${postId}?commentId=${commentId}`);
         } else {
           console.error("Comment ID is not available");
         }
