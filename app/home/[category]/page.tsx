@@ -40,10 +40,8 @@ export default function Page({ params }: { params: Promise<{ category: string }>
     // category is decoded to handle special characters 
     const decodedCategory = decodeURIComponent(category);
 
-
    
     useEffect(() => {
-
 
       async function fetchPosts() {
         try {

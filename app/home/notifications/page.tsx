@@ -3,8 +3,8 @@
   import { useState, useEffect, useCallback } from "react";
   import { useAuth } from "@clerk/nextjs";
   import { BellIcon } from "@heroicons/react/24/outline";
-  import Link from "next/link";
   import { useNotifications } from "../../context/NotificationsContext";
+  import { useRouter } from 'next/navigation';
 
   
   // Define the Notification type
@@ -24,6 +24,7 @@
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const { notificationCount, setNotificationCount, refreshNotificationCount } = useNotifications();
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
   
     const fetchNotifications = useCallback(async () => {
       try {
@@ -62,12 +63,20 @@
   
         // Decrease the notification count
         setNotificationCount(Math.max(notificationCount - 1, 0));  
-              
+
         await refreshNotificationCount();
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
     }
+
+    function handleGoToComment(postId: string, commentId: string | undefined) {
+        if (commentId) { 
+          router.push(`/home/${postId}/post/${commentId}?commentId=${commentId}`);
+        } else {
+          console.error("Comment ID is not available");
+        }
+      }
   
     return (
       <div className="p-4">
@@ -102,12 +111,13 @@
                       Mark as Read
                     </button>
                   )}
-                  <Link
-                    href={`/posts/${notification.postId}?comment=${notification.commentId}`}
-                    className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
-                  >
-                    Go to Comment
-                  </Link>
+                  {notification.commentId && (
+                    <button
+                        onClick={() => handleGoToComment(notification.postId, notification.commentId)} // Ensure commentId is passed correctly
+                    >
+                        Go to comment
+                    </button>
+                    )}
                 </div>
               </li>
             ))}
