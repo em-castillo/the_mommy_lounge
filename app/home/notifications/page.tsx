@@ -16,20 +16,12 @@
     createdAt: string;
   }
   
-  // Define the NotificationsPageProps interface
-    interface NotificationsPageProps {
-        notificationCount: number;
-        setNotificationCount: React.Dispatch<React.SetStateAction<number>>;
-    }
-  
   // Define the default NotificationsPage component
-  export default function NotificationsPage({
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    notificationCount,
-    setNotificationCount,
-  }: NotificationsPageProps) {
+  export default function NotificationsPage() {
     const { userId } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [notificationCount, setNotificationCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
   
     const fetchNotifications = useCallback(async () => {
