@@ -17,10 +17,10 @@
   }
   
   // Define the NotificationsPageProps interface
-interface NotificationsPageProps {
-    notificationCount: number;
-    setNotificationCount: React.Dispatch<React.SetStateAction<number>>;
-  }
+    interface NotificationsPageProps {
+        notificationCount: number;
+        setNotificationCount: React.Dispatch<React.SetStateAction<number>>;
+    }
   
   // Define the default NotificationsPage component
   export default function NotificationsPage({
