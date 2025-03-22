@@ -29,6 +29,7 @@
         const res = await fetch(`/api/notifications?userId=${userId}`);
         const data: Notification[] = await res.json();
         setNotifications(data);
+        setNotificationCount(data.filter((n) => !n.isRead).length);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
@@ -59,7 +60,7 @@
         );
   
         // Decrease the notification count
-        setNotificationCount((prevCount) => prevCount - 1);
+        setNotificationCount((prevCount) => Math.max(0, prevCount - 1));
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
