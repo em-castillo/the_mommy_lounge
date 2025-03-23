@@ -13,6 +13,7 @@
     userId: string;
     postId: string;
     commentId?: string;
+    category: string
     message: string;
     isRead: boolean;
     createdAt: string;
@@ -70,9 +71,9 @@
       }
     }
 
-    function handleGoToComment(postId: string, commentId: string | undefined) {
+    function handleGoToComment(postId: string, commentId: string | undefined, category: string) {
         if (commentId) { 
-          router.push(`/home/[category]/post/[id]?commentId=[commentId]`);
+          router.push(`/home/${category}/post/${postId}?commentId=${commentId}`);
         } else {
           console.error("Comment ID is not available");
         }
@@ -113,7 +114,7 @@
                   )}
                   {notification.commentId && (
                     <button
-                        onClick={() => handleGoToComment(notification.postId, notification.commentId)} 
+                        onClick={() => handleGoToComment(notification.postId, notification.commentId, notification.category)} 
                         className="mt-2 px-3 py-1 bg-red-200 text-pink-600 text-xs rounded hover:bg-red-300 transition"
                     >
                         Go to comment
