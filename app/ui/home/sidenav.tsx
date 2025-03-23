@@ -5,6 +5,8 @@ import Link from "next/link";
 import NavLinks from "@/app/ui/home/nav-links";
 import UserLinks from "./user-links";
 import TMLlogo from "@/app/ui/TML-logo";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+
 
 export default function SideNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
@@ -24,18 +26,19 @@ export default function SideNav() {
       </Link>
 
       {/* Button for toggling dropdown menu on small screens */}
-      <div className="md:hidden mb-4">
+      <div className="md:hidden mb-4 w-full">
         <button
           onClick={toggleDropdown}
-          className="w-full bg-red-50 text-pink-500 rounded-md px-4 py-3 hover:bg-red-100 hover:text-pink-600 focus:outline-none"
+          className="w-full bg-red-50 text-pink-500 rounded-md px-4 py-3 hover:bg-red-100 hover:text-pink-600 focus:outline-none flex items-center gap-2 text-left"
         >
-          Menu
+          <Bars3Icon className="w-6" />
+          <div>Menu</div>
         </button>
       </div>
 
       {/* Dropdown Menu for small screens */}
       {isDropdownOpen && (
-        <div className="md:hidden flex flex-col gap-2">
+        <div className="md:hidden flex flex-col gap-2 items-start">
           <NavLinks /> 
           <UserLinks /> 
         </div>

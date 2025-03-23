@@ -8,8 +8,8 @@ export default function NotificationsButton() {
 
   return (
     <SignedIn>
-      <Link href="/home/notifications">
-        <button className="relative flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
+      <Link href="/home/notifications" className="w-full">
+        <button className="relative flex h-[48px] w-full items-center justify-start gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3">
           <BellIcon className="w-6" />
           <div>Notifications</div>
           {notificationCount > 0 && (
@@ -20,5 +20,5 @@ export default function NotificationsButton() {
         </button>
       </Link>
     </SignedIn>
-  );
+  );  
 }

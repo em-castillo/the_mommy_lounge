@@ -59,7 +59,7 @@ export default function NavLinks() {
             href={link.name === 'Profile' && user ? `/profile/${user.id}` : link.href}
             title={link.title}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3',
+              'relative flex h-[48px] w-full items-center justify-start gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-100 hover:text-pink-600 md:flex-none md:justify-start md:p-2 md:px-3',
               {
                 'bg-red-100 text-pink-600': pathname === link.href
               },
