@@ -18,7 +18,7 @@
     createdAt: string;
   }
   
-  // Define the default NotificationsPage component
+  
   export default function NotificationsPage() {
     const { userId } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -72,7 +72,7 @@
 
     function handleGoToComment(postId: string, commentId: string | undefined) {
         if (commentId) { 
-          router.push(`/posts/${postId}?commentId=${commentId}`);
+          router.push(`/home/[category]/post/[id]?commentId=[commentId]`);
         } else {
           console.error("Comment ID is not available");
         }

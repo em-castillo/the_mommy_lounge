@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChatBubbleOvalLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useUser, SignedIn } from '@clerk/nextjs';
+import { useSearchParams } from "next/navigation";
 
 interface Post {
   _id: string;
@@ -38,6 +39,8 @@ export default function PostPage() {
   const [editedText, setEditedText] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [originalText, setOriginalText] = useState('');
+  const searchParams = useSearchParams();
+  const commentId = searchParams?.get("commentId") || null;
   
   // Define a ref object to hold the references to each comment
   const commentRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
@@ -89,15 +92,15 @@ export default function PostPage() {
     fetchComments();
   }, [id]); // Run the effect when postId changes
 
-  
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const commentId = urlParams.get("commentId");
 
-    if (commentId && commentRefs.current[commentId]) {
+  // Scroll down to comment
+  useEffect(() => {
+  if (commentId && commentRefs.current[commentId]) {
+    setTimeout(() => {
       commentRefs.current[commentId]?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [post]);
+    }, 100);
+  }
+}, [commentId, comments]); 
 
 
 // Add comment
